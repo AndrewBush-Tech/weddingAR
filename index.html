@@ -7,9 +7,20 @@
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
+
+  <!-- 🔄 Loading Overlay -->
+  <div id="loading" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white;
+    display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    <p>🔍 Scanning marker...</p>
+  </div>
+
+  <!-- ▶️ Fallback Play Button -->
+  <button id="playButton" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 999; padding: 10px 20px; font-size: 16px; display: none;">
+    ▶️ Play Video
+  </button>
+
   <a-scene embedded arjs>
-    
-    <!-- Use custom pattern marker -->
     <a-marker type="pattern" url="assets/target-image.patt">
       <a-video 
         src="#weddingVideo"
@@ -19,39 +30,43 @@
         position="0 0 0"
       ></a-video>
     </a-marker>
-
     <a-entity camera></a-entity>
 
-    <!-- Hidden video element used as source -->
+    <!-- Hidden video element -->
     <video 
       id="weddingVideo" 
       src="assets/wedding.mp4"
-      playsinline
+      playsinline 
       muted
-      loop
-      style="display: none"
-    ></video>
-
+      loop 
+      style="display: none">
+    </video>
   </a-scene>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const video = document.querySelector("#weddingVideo");
       const marker = document.querySelector("a-marker");
+      const loading = document.getElementById("loading");
+      const playButton = document.getElementById("playButton");
 
-      // ✅ iOS fix: allow sound after user taps anywhere
       let userInteracted = false;
+
+      // 🔊 Allow unmuting after user interaction (for iOS)
       window.addEventListener('touchstart', () => {
         if (!userInteracted) {
           video.muted = false;
           userInteracted = true;
+          playButton.style.display = "none"; // hide button if autoplay now works
         }
       });
 
       marker.addEventListener("markerFound", () => {
+        loading.style.display = "none"; // ✅ Hide loading overlay
         if (video.paused) {
           video.play().catch(err => {
             console.warn("Autoplay blocked:", err);
+            playButton.style.display = "block"; // ❗ Show play button if blocked
           });
         }
       });
@@ -59,7 +74,22 @@
       marker.addEventListener("markerLost", () => {
         video.pause();
       });
+
+      // ▶️ Fallback manual play button
+      playButton.addEventListener("click", () => {
+        video.play().then(() => {
+          playButton.style.display = "none";
+        }).catch(err => {
+          console.warn("Manual play failed:", err);
+        });
+      });
+
+      // 🔒 Hide button if video starts playing
+      video.addEventListener("play", () => {
+        playButton.style.display = "none";
+      });
     });
   </script>
+
 </body>
 </html>
