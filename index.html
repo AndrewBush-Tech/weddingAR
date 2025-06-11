@@ -34,7 +34,7 @@
 
     <!-- Hidden video element -->
     <video 
-      id="weddingVideo" 
+      id="weddingVideo"
       src="assets/wedding.mp4"
       playsinline 
       loop 
@@ -50,16 +50,16 @@
       const playButton = document.getElementById("playButton");
 
       let userInteracted = false;
-
-      // 🧠 Detect iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-      // 🔊 Android: allow autoplay with sound
-      if (!isIOS) {
-        video.muted = false;
+      // 📱 iOS: Start muted so autoplay works
+      if (isIOS) {
+        video.muted = true;
+      } else {
+        video.muted = false; // ✅ Android: start unmuted
       }
 
-      // 🔇 iOS: Wait for touch to unmute
+      // 🖐️ iOS: Allow unmute after user touch
       window.addEventListener('touchstart', () => {
         if (!userInteracted && isIOS) {
           video.muted = false;
