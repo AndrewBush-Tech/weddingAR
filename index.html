@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Wedding AR</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <a-scene embedded arjs>
+    
+    <!-- Use custom pattern marker -->
+    <a-marker type="pattern" url="assets/target-image.patt">
+      <a-video 
+        src="#weddingVideo"
+        rotation="-90 0 0"
+        width="1.05" 
+        height="1.05"
+        position="0 0 0"
+      ></a-video>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+
+    <!-- Hidden video element used as source -->
+    <video 
+      id="weddingVideo" 
+      src="assets/wedding.mp4"
+      playsinline 
+      loop 
+      style="display: none"
+    ></video>
+
+  </a-scene>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const video = document.querySelector("#weddingVideo");
+      const marker = document.querySelector("a-marker");
+
+      marker.addEventListener("markerFound", () => {
+        if (video.paused) {
+          video.play().catch(err => {
+            console.warn("Autoplay blocked:", err);
+          });
+        }
+      });
+
+      marker.addEventListener("markerLost", () => {
+        video.pause();
+      });
+    });
+  </script>
+</body>
+</html>
