@@ -5,28 +5,22 @@
   <title>Wedding AR</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
-  <style>
-    #instruction {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5em;
-      color: white;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 1em 1.5em;
-      border-radius: 10px;
-      z-index: 10;
-      text-align: center;
-    }
-  </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-  <!-- Floating instructional message -->
-  <div id="instruction">Point camera at image to hear sound 🎶</div>
+
+  <!-- 🔄 Loading Overlay -->
+  <div id="loading" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.267);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    <p>🔍 Scan marker to start!</p>
+  </div>
+
+  <!-- ▶️ Fallback Play Button -->
+  <button id="playButton" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 999; padding: 10px 20px; font-size: 16px; display: none;">
+    ▶️ Play Video
+  </button>
 
   <a-scene embedded arjs>
-    <!-- Use custom pattern marker -->
     <a-marker type="pattern" url="assets/target-image.patt">
       <a-video 
         src="#weddingVideo"
@@ -36,47 +30,43 @@
         position="0 0 0"
       ></a-video>
     </a-marker>
-
     <a-entity camera></a-entity>
 
-    <!-- Hidden video element used as source -->
+    <!-- Hidden video element -->
     <video 
       id="weddingVideo" 
       src="assets/wedding.mp4"
       playsinline 
       muted
       loop 
-      style="display: none"
-    ></video>
+      style="display: none">
+    </video>
   </a-scene>
 
   <script>
-    function isIOS() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
       const video = document.querySelector("#weddingVideo");
       const marker = document.querySelector("a-marker");
-      const instruction = document.getElementById("instruction");
+      const loading = document.getElementById("loading");
+      const playButton = document.getElementById("playButton");
 
-      let userUnmuted = false;
+      let userInteracted = false;
+
+      // 🔊 Allow unmuting after user interaction (for iOS)
+      window.addEventListener('touchstart', () => {
+        if (!userInteracted) {
+          video.muted = false;
+          userInteracted = true;
+          playButton.style.display = "none"; // hide button if autoplay now works
+        }
+      });
 
       marker.addEventListener("markerFound", () => {
-        // iOS: unmute once upon marker detection
-        if (isIOS() && !userUnmuted) {
-          video.muted = false;
-          userUnmuted = true;
-        }
-
-        // Hide instruction once marker is found
-        if (instruction) {
-          instruction.style.display = "none";
-        }
-
+        loading.style.display = "none"; // ✅ Hide loading overlay
         if (video.paused) {
           video.play().catch(err => {
             console.warn("Autoplay blocked:", err);
+            playButton.style.display = "block"; // ❗ Show play button if blocked
           });
         }
       });
@@ -84,7 +74,22 @@
       marker.addEventListener("markerLost", () => {
         video.pause();
       });
+
+      // ▶️ Fallback manual play button
+      playButton.addEventListener("click", () => {
+        video.play().then(() => {
+          playButton.style.display = "none";
+        }).catch(err => {
+          console.warn("Manual play failed:", err);
+        });
+      });
+
+      // 🔒 Hide button if video starts playing
+      video.addEventListener("play", () => {
+        playButton.style.display = "none";
+      });
     });
   </script>
+
 </body>
 </html>
