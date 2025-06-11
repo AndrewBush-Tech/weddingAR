@@ -26,8 +26,9 @@
     <video 
       id="weddingVideo" 
       src="assets/wedding.mp4"
-      playsinline 
-      loop 
+      playsinline
+      muted
+      loop
       style="display: none"
     ></video>
 
@@ -37,6 +38,15 @@
     document.addEventListener("DOMContentLoaded", () => {
       const video = document.querySelector("#weddingVideo");
       const marker = document.querySelector("a-marker");
+
+      // ✅ iOS fix: allow sound after user taps anywhere
+      let userInteracted = false;
+      window.addEventListener('touchstart', () => {
+        if (!userInteracted) {
+          video.muted = false;
+          userInteracted = true;
+        }
+      });
 
       marker.addEventListener("markerFound", () => {
         if (video.paused) {
