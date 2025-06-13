@@ -22,14 +22,8 @@
 
   <a-scene embedded arjs>
 
-    <!-- Assets -->
-    <a-assets>
-      <video id="weddingVideo" src="assets/wedding.mp4" playsinline loop crossorigin="anonymous"></video>
-      <a-asset-item id="heartModel" src="assets/heart.glb"></a-asset-item>
-    </a-assets>
-
+    <!-- Marker and video -->
     <a-marker type="pattern" url="assets/target-image.patt">
-      <!-- Video Plane -->
       <a-video 
         src="#weddingVideo"
         rotation="-90 0 0"
@@ -38,17 +32,26 @@
         position="0 0 0"
       ></a-video>
 
-      <!-- Floating Heart -->
-      <a-entity id="heart"
-        gltf-model="#heartModel"
-        scale="0.2 0.2 0.2"
-        position="0 0.1 0"
-        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 1.2 0"
-        animation__fade="property: material.opacity; from: 1; to: 0; dir: alternate; dur: 2000; loop: true">
-      </a-entity>
+      <!-- 💗 Floating Hearts Container -->
+      <a-entity id="heartsContainer"></a-entity>
     </a-marker>
 
     <a-entity camera></a-entity>
+
+    <!-- Hidden video element -->
+    <video 
+      id="weddingVideo"
+      src="assets/wedding.mp4"
+      playsinline 
+      loop 
+      style="display: none">
+    </video>
+
+    <!-- ❤️ Heart model asset -->
+    <a-assets>
+      <a-asset-item id="heartModel" src="assets/heart.glb"></a-asset-item>
+    </a-assets>
+    
   </a-scene>
 
   <script>
@@ -57,18 +60,15 @@
       const marker = document.querySelector("a-marker");
       const loading = document.getElementById("loading");
       const playButton = document.getElementById("playButton");
+      const heartsContainer = document.getElementById("heartsContainer");
 
       let userInteracted = false;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-      // 📱 iOS: Start muted so autoplay works
-      if (isIOS) {
-        video.muted = true;
-      } else {
-        video.muted = false;
-      }
+      // 🎧 Autoplay rules per platform
+      video.muted = isIOS;
 
-      // 🖐️ iOS: Allow unmute after user touch
+      // 🖐️ iOS: allow unmute after touch
       window.addEventListener('touchstart', () => {
         if (!userInteracted && isIOS) {
           video.muted = false;
@@ -102,8 +102,68 @@
       video.addEventListener("play", () => {
         playButton.style.display = "none";
       });
+
+      // 💗 Spawn animated hearts beside the video
+      function spawnHearts(count) {
+        heartsContainer.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const heart = document.createElement("a-entity");
+
+          const x = i % 2 === 0 ? -1.2 : 1.2;  // left/right of video
+          const z = -2.0;                      // deep behind video
+          const startY = -10.0;                 // very low
+          const endY = -0.4;                   // float to just below video
+          const delay = i * 1000 + Math.random() * 300;
+
+          heart.setAttribute("gltf-model", "#heartModel");
+          heart.setAttribute("scale", "0.003 0.003 0.003");
+          heart.setAttribute("position", `${x} ${startY} ${z}`);
+          heart.setAttribute("material", "color: red; opacity: 0.85; transparent: true;");
+
+          // 💨 Float vertically
+          heart.setAttribute("animation__float", {
+            property: "position",
+            from: `${x} ${startY} ${z}`,
+            to: `${x} ${endY} ${z}`,
+            dur: 4000,
+            delay: delay,
+            loop: true,
+            dir: "alternate",
+            easing: "easeInOutSine"
+          });
+
+          // 🌫️ Fade
+          heart.setAttribute("animation__fade", {
+            property: "material.opacity",
+            from: 0.85,
+            to: 0,
+            dur: 4000,
+            delay: delay,
+            loop: true,
+            dir: "alternate"
+          });
+
+          // 💥 Pop scale
+          heart.setAttribute("animation__scale", {
+            property: "scale",
+            from: "0.003 0.003 0.003",
+            to: "0.0045 0.0045 0.0045",
+            dur: 4000,
+            delay: delay,
+            loop: true,
+            dir: "alternate",
+            easing: "easeOutQuad"
+          });
+
+          heartsContainer.appendChild(heart);
+        }
+      }
+
+      // Start hearts after slight delay
+      setTimeout(() => {
+        spawnHearts(6);  // Adjust number as needed
+      }, 2000);
     });
   </script>
-
 </body>
 </html>
