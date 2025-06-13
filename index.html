@@ -21,7 +21,15 @@
   </button>
 
   <a-scene embedded arjs>
+
+    <!-- Assets -->
+    <a-assets>
+      <video id="weddingVideo" src="assets/wedding.mp4" playsinline loop crossorigin="anonymous"></video>
+      <a-asset-item id="heartModel" src="assets/heart.glb"></a-asset-item>
+    </a-assets>
+
     <a-marker type="pattern" url="assets/target-image.patt">
+      <!-- Video Plane -->
       <a-video 
         src="#weddingVideo"
         rotation="-90 0 0"
@@ -29,17 +37,18 @@
         height="1.05"
         position="0 0 0"
       ></a-video>
-    </a-marker>
-    <a-entity camera></a-entity>
 
-    <!-- Hidden video element -->
-    <video 
-      id="weddingVideo"
-      src="assets/wedding.mp4"
-      playsinline 
-      loop 
-      style="display: none">
-    </video>
+      <!-- Floating Heart -->
+      <a-entity id="heart"
+        gltf-model="#heartModel"
+        scale="0.2 0.2 0.2"
+        position="0 0.1 0"
+        animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 1.2 0"
+        animation__fade="property: material.opacity; from: 1; to: 0; dir: alternate; dur: 2000; loop: true">
+      </a-entity>
+    </a-marker>
+
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
@@ -56,7 +65,7 @@
       if (isIOS) {
         video.muted = true;
       } else {
-        video.muted = false; // ✅ Android: start unmuted
+        video.muted = false;
       }
 
       // 🖐️ iOS: Allow unmute after user touch
