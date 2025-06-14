@@ -65,10 +65,8 @@
       let userInteracted = false;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-      // 🎧 Autoplay rules per platform
       video.muted = isIOS;
 
-      // 🖐️ iOS: allow unmute after touch
       window.addEventListener('touchstart', () => {
         if (!userInteracted && isIOS) {
           video.muted = false;
@@ -103,28 +101,29 @@
         playButton.style.display = "none";
       });
 
-      // 💗 Spawn animated hearts beside the video
+      // 💗 Spawn floating hearts beside video
       function spawnHearts(count) {
         heartsContainer.innerHTML = '';
         for (let i = 0; i < count; i++) {
           const heart = document.createElement("a-entity");
 
-          const x = i % 2 === 0 ? -1.2 : 1.2;  // left/right of video
-          const z = -2.0;                      // deep behind video
-          const startY = -10.0;                 // very low
-          const endY = -0.4;                   // float to just below video
-          const delay = i * 1000 + Math.random() * 300;
+          const x = i % 2 === 0 ? -0.9 : 0.9; // Left or right of video
+          const y = 0.0; // Same level as video
+          const zStart = 1.0;  // Start below
+          const zEnd = -1.0;    // Float up to just under video
+          const delay = i * 1200 + Math.random() * 300;
 
           heart.setAttribute("gltf-model", "#heartModel");
           heart.setAttribute("scale", "0.003 0.003 0.003");
-          heart.setAttribute("position", `${x} ${startY} ${z}`);
+          heart.setAttribute("position", `${x} ${y} ${zStart}`);
+          heart.setAttribute("rotation", "-90 0 0");  // Align with video
           heart.setAttribute("material", "color: red; opacity: 0.85; transparent: true;");
 
-          // 💨 Float vertically
+          // Vertical float (z axis due to -90 rotation)
           heart.setAttribute("animation__float", {
             property: "position",
-            from: `${x} ${startY} ${z}`,
-            to: `${x} ${endY} ${z}`,
+            from: `${x} ${y} ${zStart}`,
+            to: `${x} ${y} ${zEnd}`,
             dur: 4000,
             delay: delay,
             loop: true,
@@ -132,7 +131,7 @@
             easing: "easeInOutSine"
           });
 
-          // 🌫️ Fade
+          // Fade
           heart.setAttribute("animation__fade", {
             property: "material.opacity",
             from: 0.85,
@@ -143,7 +142,7 @@
             dir: "alternate"
           });
 
-          // 💥 Pop scale
+          // Pop
           heart.setAttribute("animation__scale", {
             property: "scale",
             from: "0.003 0.003 0.003",
@@ -159,9 +158,8 @@
         }
       }
 
-      // Start hearts after slight delay
       setTimeout(() => {
-        spawnHearts(6);  // Adjust number as needed
+        spawnHearts(6);
       }, 2000);
     });
   </script>
