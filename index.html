@@ -34,7 +34,7 @@
     </a-marker>
 
     <!-- Floating hearts not inside marker -->
-    <a-entity id="heartsContainer" position="0 0 -2"></a-entity>
+    <a-entity id="heartsContainer" position="0 0 -1.3"></a-entity>
 
     <a-entity camera></a-entity>
 
@@ -107,14 +107,14 @@
         for (let i = 0; i < count; i++) {
           const heart = document.createElement("a-entity");
 
-          const x = i % 2 === 0 ? -0.9 : 0.9; // Left or right
+          const x = i % 2 === 0 ? -0.25 : 0.25; // Closer to center
           const yStart = -1.0;
           const yEnd = 1.5;
           const z = 0;
           const delay = i * 1000 + Math.random() * 500;
 
           heart.setAttribute("gltf-model", "#heartModel");
-          heart.setAttribute("scale", "0.003 0.003 0.003");
+          heart.setAttribute("scale", "0.00003 0.00003 0.00003");
           heart.setAttribute("position", `${x} ${yStart} ${z}`);
           heart.setAttribute("material", "color: red; opacity: 0.85; transparent: true;");
 
@@ -123,7 +123,7 @@
             property: "position",
             from: `${x} ${yStart} ${z}`,
             to: `${x} ${yEnd} ${z}`,
-            dur: 4000,
+            dur: 10000,
             delay: delay,
             loop: true,
             dir: "alternate",
@@ -141,11 +141,11 @@
             dir: "alternate"
           });
 
-          // Pop scale
+          // Pop scale animation
           heart.setAttribute("animation__scale", {
             property: "scale",
-            from: "0.003 0.003 0.003",
-            to: "0.0045 0.0045 0.0045",
+            from: "0.00003 0.00003 0.00003",
+            to: "0.000045 0.000045 0.000045",
             dur: 4000,
             delay: delay,
             loop: true,
